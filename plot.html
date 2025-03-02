@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Plot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plot.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/analysis">Analysis</a></li>
+            <li><a href="/share-info">Share Info</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1 id="stockTitle">Stock Price for AAPL</h1>
+
+        <label for="ticker">Choose a Stock:</label>
+        <select id="ticker" onchange="fetchStockData()">
+            <option value="AAPL">Apple (AAPL)</option>
+            <option value="MSFT">Microsoft (MSFT)</option>
+            <option value="GOOGL">Google (GOOGL)</option>
+            <option value="AMZN">Amazon (AMZN)</option>
+            <option value="TSLA">Tesla (TSLA)</option>
+            <option value="NVDA">Nvidia (NVDA)</option>
+            <option value="META">Meta (META)</option>
+            <option value="NFLX">Netflix (NFLX)</option>
+            <option value="AMD">AMD (AMD)</option>
+            <option value="INTC">Intel (INTC)</option>
+            <option value="BA">Boeing (BA)</option>
+            <option value="DIS">Disney (DIS)</option>
+            <option value="PEP">PepsiCo (PEP)</option>
+            <option value="KO">Coca-Cola (KO)</option>
+            <option value="XOM">ExxonMobil (XOM)</option>
+            <option value="CVX">Chevron (CVX)</option>
+            <option value="JPM">JPMorgan Chase (JPM)</option>
+            <option value="GS">Goldman Sachs (GS)</option>
+            <option value="WMT">Walmart (WMT)</option>
+            <option value="TGT">Target (TGT)</option>
+            <option value="PYPL">PayPal (PYPL)</option>
+            <option value="SQ">Square (SQ)</option>
+            <option value="UBER">Uber (UBER)</option>
+            <option value="LYFT">Lyft (LYFT)</option>
+            <option value="PFE">Pfizer (PFE)</option>
+            <option value="MRNA">Moderna (MRNA)</option>
+            <option value="JNJ">Johnson & Johnson (JNJ)</option>
+            <option value="BABA">Alibaba (BABA)</option>
+            <option value="NKE">Nike (NKE)</option>
+            <option value="ADBE">Adobe (ADBE)</option>
+            <option value="ORCL">Oracle (ORCL)</option>
+            <option value="IBM">IBM (IBM)</option>
+            <option value="CRM">Salesforce (CRM)</option>
+            <option value="CSCO">Cisco (CSCO)</option>
+            <option value="QCOM">Qualcomm (QCOM)</option>
+            <option value="VZ">Verizon (VZ)</option>
+            <option value="T">AT&T (T)</option>
+            <option value="COST">Costco (COST)</option>
+            <option value="MA">Mastercard (MA)</option>
+            <option value="V">Visa (V)</option>
+            <option value="MCD">McDonald's (MCD)</option>
+            <option value="SBUX">Starbucks (SBUX)</option>
+            <option value="TSM">TSMC (TSM)</option>
+            <option value="SAP">SAP (SAP)</option>
+            <option value="DELL">Dell (DELL)</option>
+            <option value="HPQ">HP (HPQ)</option>
+            <option value="F">Ford (F)</option>
+            <option value="MOTILALOFS.NS">MOTILALOFS</option>
+            <option value="GM">General Motors (GM)</option>
+        </select>
+
+        <label for="chartType">Chart Type:</label>
+        <select id="chartType" onchange="fetchStockData()">
+            <option value="line">Classic Line Chart</option>
+            <option value="candlestick">Candlestick Chart</option>
+        </select>
+
+        <button onclick="fetchStockData()">Get Plot</button>
+        <button onclick="fetchPredictedData()">Get Prediction</button>
+
+        <p id="loadingMessage" style="display: none; color: blue;">Fetching data...</p>
+        <div id="plot"></div>
+    </div>
+
+    <script>
+        async function fetchStockData() {
+            try {
+                document.getElementById("loadingMessage").style.display = "block"; 
+                let ticker = document.getElementById("ticker").value;
+                let chartType = document.getElementById("chartType").value;
+
+                document.getElementById("stockTitle").innerText = `Stock Price for ${ticker}`;
+
+                let response = await fetch(`/get_stock_data?ticker=${ticker}`);
+                let data = await response.json();
+
+                document.getElementById("loadingMessage").style.display = "none"; 
+
+                if (!data.dates || data.dates.length === 0) {
+                    alert("No stock data available.");
+                    return;
+                }
+
+                let trace;
+                if (chartType === "candlestick") {
+                    trace = {
+                        x: data.dates,
+                        open: data.open,
+                        high: data.high,
+                        low: data.low,
+                        close: data.close,
+                        type: "candlestick"
+                    };
+                } else {
+                    trace = {
+                        x: data.dates,
+                        y: data.close,
+                        type: "scatter",
+                        mode: "lines",
+                        line: { color: "#16a085" }
+                    };
+                }
+
+                let layout = {
+                    title: `${ticker} Stock Price`,
+                    xaxis: { title: "Date", rangeslider: { visible: false } },
+                    yaxis: { title: "Price ($)" }
+                };
+
+                Plotly.newPlot("plot", [trace], layout);
+            } catch (error) {
+                document.getElementById("loadingMessage").style.display = "none"; 
+                console.error("Error fetching stock data:", error);
+                alert("Failed to fetch stock data.");
+            }
+        }
+
+        async function fetchPredictedData() {
+            try {
+                document.getElementById("loadingMessage").style.display = "block";
+                let ticker = document.getElementById("ticker").value;
+
+                let response = await fetch(`/predict_stock?ticker=${ticker}`);
+                let data = await response.json();
+
+                document.getElementById("loadingMessage").style.display = "none";
+
+                if (!data.graph) {
+                    alert("No prediction data available.");
+                    return;
+                }
+
+                let plot_data = JSON.parse(data.graph);
+                Plotly.newPlot("plot", plot_data);
+            } catch (error) {
+                document.getElementById("loadingMessage").style.display = "none";
+                console.error("Error fetching prediction data:", error);
+                alert("Failed to fetch prediction data.");
+            }
+        }
+
+        // Load default stock data when the page loads
+        fetchStockData();
+    </script>
+
+</body>
+</html>
