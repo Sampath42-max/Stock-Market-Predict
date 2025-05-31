@@ -1,1 +1,54 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/market.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <img src="back1.jpg" width="1920" height="10">
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/analysis">Analysis</a></li>
+            <li><a href="/share-info">Share Info</a></li>
+        </ul>
+    </nav>
+
+    <!-- Table Section -->
+    <div class="table-container">
+        <h2>Stock Market Analysis</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Ticker</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Value</th>
+                    <th>Volume</th>
+                </tr>
+            </thead>
+            <tbody id="stock-data">
+                {% for stock in stock_market %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ stock.Ticker }}</td>
+                    <td>{{ stock.Open }}</td>
+                    <td>{{ stock.High }}</td>
+                    <td>{{ stock.Low }}</td>
+                    <td>{{ stock.Close }}</td>
+                    <td>{{ stock.Value if stock.Value else 'N/A' }}</td>
+                    <td>{{ stock.Volume if stock.Volume else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
