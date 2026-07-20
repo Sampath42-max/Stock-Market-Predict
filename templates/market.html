@@ -1,54 +1,139 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/market.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Market Overview | StockPulse Intelligence</title>
+    <link rel="stylesheet" href="../static/market.css">
 </head>
 <body>
-    <img src="back1.jpg" width="1920" height="10">
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/analysis">Analysis</a></li>
-            <li><a href="/share-info">Share Info</a></li>
-        </ul>
-    </nav>
 
-    <!-- Table Section -->
-    <div class="table-container">
-        <h2>Stock Market Analysis</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Ticker</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                    <th>Value</th>
-                    <th>Volume</th>
-                </tr>
-            </thead>
-            <tbody id="stock-data">
-                {% for stock in stock_market %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ stock.Ticker }}</td>
-                    <td>{{ stock.Open }}</td>
-                    <td>{{ stock.High }}</td>
-                    <td>{{ stock.Low }}</td>
-                    <td>{{ stock.Close }}</td>
-                    <td>{{ stock.Value if stock.Value else 'N/A' }}</td>
-                    <td>{{ stock.Volume if stock.Volume else 'N/A' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <!-- Sticky Navbar -->
+    <header class="navbar-container">
+        <nav class="navbar">
+            <a href="/" class="brand-logo">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 15.67z"/></svg>
+                </div>
+                <div class="brand-text">Stock<span>Pulse</span></div>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/analysis" class="active">Market Overview</a></li>
+                <li><a href="/share-info">Stock Studio</a></li>
+            </ul>
 
+            <div id="market-status" class="status-badge closed">
+                <span class="status-dot"></span> <span id="status-text">Market Status</span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-wrapper">
+        <div class="market-header">
+            <div class="market-title">
+                <h1>Global Market Overview</h1>
+                <p>Real-time quotes, daily metrics, volume analysis, and instant prediction access</p>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="category-tabs">
+                <button class="tab-btn active" onclick="filterCategory('all', this)">All Tickers</button>
+                <button class="tab-btn" onclick="filterCategory('gainers', this)">Top Gainers</button>
+                <button class="tab-btn" onclick="filterCategory('losers', this)">Top Losers</button>
+            </div>
+
+            <input type="text" id="table-search" class="table-search-input" placeholder="Search table by ticker or name..." onkeyup="searchTable()">
+        </div>
+
+        <!-- Stock Table Container -->
+        <div class="glass-panel table-responsive">
+            <table class="market-table" id="stock-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>Ticker</th>
+                        <th>Close Price</th>
+                        <th>24h Change</th>
+                        <th>24h %</th>
+                        <th>Day High</th>
+                        <th>Day Low</th>
+                        <th>Volume</th>
+                        <th style="text-align: center;">5-Day Trend</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    {% if stock_market %}{% for stock in stock_market %}<tr data-ticker="{{ stock.Ticker }}" data-change="{{ stock.ChangePct }}">
+                        <td style="color: var(--text-dim);">{{ loop.index }}</td>
+                        <td>
+                            <div class="ticker-badge">
+                                <div class="ticker-icon">{{ stock.Ticker[:2] }}</div>
+                                <span>{{ stock.Ticker }}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 700; color: var(--text-main);">${{ "%.2f"|format(stock.Close) if stock.Close else 'N/A' }}</td>
+                        <td>
+                            {% if stock.Change is defined and stock.Change != None %}<span class="{{ 'price-up' if stock.Change >= 0 else 'price-down' }}">{{ '+' if stock.Change >= 0 else '' }}${{ "%.2f"|format(stock.Change) }}</span>{% else %} N/A {% endif %}
+                        </td>
+                        <td>
+                            {% if stock.ChangePct is defined and stock.ChangePct != None %}<span class="change-pill {{ 'up' if stock.ChangePct >= 0 else 'down' }}">{{ '+' if stock.ChangePct >= 0 else '' }}{{ "%.2f"|format(stock.ChangePct) }}%</span>{% else %} N/A {% endif %}
+                        </td>
+                        <td>${{ "%.2f"|format(stock.High) if stock.High else 'N/A' }}</td>
+                        <td>${{ "%.2f"|format(stock.Low) if stock.Low else 'N/A' }}</td>
+                        <td>{{ "{:,}".format(stock.Volume) if stock.Volume and stock.Volume != 'N/A' else 'N/A' }}</td>
+                        <td style="text-align: center;">-</td>
+                        <td style="text-align: center;">
+                            <a href="/share-info?ticker={{ stock.Ticker }}" class="action-link">Predict &rarr;</a>
+                        </td>
+                    </tr>{% endfor %}{% endif %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 StockPulse Predictor Engine. Real-time market analytics.</p>
+    </footer>
+
+    <script src="../static/script.js"></script>
+    <script>
+        const LOCAL_API_BASE = (window.location.port === '5500' || window.location.protocol === 'file:') ? 'http://127.0.0.1:5000' : '';
+
+        function searchTable() {
+            const input = document.getElementById("table-search").value.toUpperCase();
+            const rows = document.querySelectorAll("#table-body tr");
+            
+            rows.forEach(row => {
+                const ticker = row.getAttribute("data-ticker") || "";
+                if (ticker.toUpperCase().includes(input)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        function filterCategory(category, btn) {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            const rows = Array.from(document.querySelectorAll("#table-body tr"));
+            
+            rows.forEach(row => {
+                const change = parseFloat(row.getAttribute("data-change") || 0);
+                if (category === "all") {
+                    row.style.display = "";
+                } else if (category === "gainers") {
+                    row.style.display = change > 0 ? "" : "none";
+                } else if (category === "losers") {
+                    row.style.display = change < 0 ? "" : "none";
+                }
+            });
+        }
+    </script>
 </body>
 </html>

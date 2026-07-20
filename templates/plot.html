@@ -3,169 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Price Plot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/plot.css') }}">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Stock Studio & AI Forecast | StockPulse</title>
+    <link rel="stylesheet" href="../static/plot.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 </head>
 <body>
 
-    <nav class="navbar">
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/analysis">Analysis</a></li>
-            <li><a href="/share-info">Share Info</a></li>
-        </ul>
-    </nav>
+    <!-- Sticky Navbar -->
+    <header class="navbar-container">
+        <nav class="navbar">
+            <a href="/" class="brand-logo">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 15.67z"/></svg>
+                </div>
+                <div class="brand-text">Stock<span>Pulse</span> Studio</div>
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/analysis">Market Overview</a></li>
+                <li><a href="/share-info" class="active">Stock Studio</a></li>
+            </ul>
 
-    <div class="container">
-        <h1 id="stockTitle">Stock Price for AAPL</h1>
+            <div id="market-status" class="status-badge closed">
+                <span class="status-dot"></span> <span>Stock Studio</span>
+            </div>
+        </nav>
+    </header>
 
-        <label for="ticker">Choose a Stock:</label>
-        <select id="ticker" onchange="fetchStockData()">
-            <option value="AAPL">Apple (AAPL)</option>
-            <option value="MSFT">Microsoft (MSFT)</option>
-            <option value="GOOGL">Google (GOOGL)</option>
-            <option value="AMZN">Amazon (AMZN)</option>
-            <option value="TSLA">Tesla (TSLA)</option>
-            <option value="NVDA">Nvidia (NVDA)</option>
-            <option value="META">Meta (META)</option>
-            <option value="NFLX">Netflix (NFLX)</option>
-            <option value="AMD">AMD (AMD)</option>
-            <option value="INTC">Intel (INTC)</option>
-            <option value="BA">Boeing (BA)</option>
-            <option value="DIS">Disney (DIS)</option>
-            <option value="PEP">PepsiCo (PEP)</option>
-            <option value="KO">Coca-Cola (KO)</option>
-            <option value="XOM">ExxonMobil (XOM)</option>
-            <option value="CVX">Chevron (CVX)</option>
-            <option value="JPM">JPMorgan Chase (JPM)</option>
-            <option value="GS">Goldman Sachs (GS)</option>
-            <option value="WMT">Walmart (WMT)</option>
-            <option value="TGT">Target (TGT)</option>
-            <option value="PYPL">PayPal (PYPL)</option>
-            <option value="SQ">Square (SQ)</option>
-            <option value="UBER">Uber (UBER)</option>
-            <option value="LYFT">Lyft (LYFT)</option>
-            <option value="PFE">Pfizer (PFE)</option>
-            <option value="MRNA">Moderna (MRNA)</option>
-            <option value="JNJ">Johnson & Johnson (JNJ)</option>
-            <option value="BABA">Alibaba (BABA)</option>
-            <option value="NKE">Nike (NKE)</option>
-            <option value="ADBE">Adobe (ADBE)</option>
-            <option value="ORCL">Oracle (ORCL)</option>
-            <option value="IBM">IBM (IBM)</option>
-            <option value="CRM">Salesforce (CRM)</option>
-            <option value="CSCO">Cisco (CSCO)</option>
-            <option value="QCOM">Qualcomm (QCOM)</option>
-            <option value="VZ">Verizon (VZ)</option>
-            <option value="T">AT&T (T)</option>
-            <option value="COST">Costco (COST)</option>
-            <option value="MA">Mastercard (MA)</option>
-            <option value="V">Visa (V)</option>
-            <option value="MCD">McDonald's (MCD)</option>
-            <option value="SBUX">Starbucks (SBUX)</option>
-            <option value="TSM">TSMC (TSM)</option>
-            <option value="SAP">SAP (SAP)</option>
-            <option value="DELL">Dell (DELL)</option>
-            <option value="HPQ">HP (HPQ)</option>
-            <option value="F">Ford (F)</option>
-            <option value="MOTILALOFS.NS">MOTILALOFS</option>
-            <option value="GM">General Motors (GM)</option>
-        </select>
+    <main class="main-wrapper">
+        
+        <!-- Controls Bar -->
+        <div class="glass-panel chart-controls">
+            <div class="control-group">
+                <span class="control-label">Select Stock:</span>
+                <select id="ticker-select" class="select-box" onchange="onTickerChange()">
+                    <option value="AAPL" selected>Apple Inc. (AAPL)</option>
+                    <option value="MSFT">Microsoft (MSFT)</option>
+                    <option value="NVDA">NVIDIA (NVDA)</option>
+                    <option value="TSLA">Tesla (TSLA)</option>
+                    <option value="AMZN">Amazon (AMZN)</option>
+                    <option value="GOOGL">Alphabet (GOOGL)</option>
+                    <option value="META">Meta Platforms (META)</option>
+                    <option value="NFLX">Netflix (NFLX)</option>
+                    <option value="AMD">AMD (AMD)</option>
+                    <option value="INTC">Intel (INTC)</option>
+                    <option value="PLTR">Palantir (PLTR)</option>
+                    <option value="ARM">Arm Holdings (ARM)</option>
+                    <option value="SMCI">Super Micro (SMCI)</option>
+                    <option value="COIN">Coinbase (COIN)</option>
+                    <option value="UBER">Uber (UBER)</option>
+                    <option value="JPM">JPMorgan Chase (JPM)</option>
+                    <option value="V">Visa (V)</option>
+                    <option value="MA">Mastercard (MA)</option>
+                    <option value="WMT">Walmart (WMT)</option>
+                    <option value="DIS">Disney (DIS)</option>
+                    <option value="RELIANCE.NS">Reliance Industries (NSE)</option>
+                    <option value="TCS.NS">Tata Consultancy (NSE)</option>
+                    <option value="INFY.NS">Infosys (NSE)</option>
+                    <option value="HDFCBANK.NS">HDFC Bank (NSE)</option>
+                    <option value="ICICIBANK.NS">ICICI Bank (NSE)</option>
+                    <option value="TATAMOTORS.NS">Tata Motors (NSE)</option>
+                    <option value="MOTILALOFS.NS">Motilal Oswal (NSE)</option>
+                    <option value="SPY">S&P 500 ETF (SPY)</option>
+                    <option value="QQQ">Nasdaq 100 ETF (QQQ)</option>
+                    <option value="BTC-USD">Bitcoin (BTC-USD)</option>
+                    <option value="ETH-USD">Ethereum (ETH-USD)</option>
+                </select>
 
-        <label for="chartType">Chart Type:</label>
-        <select id="chartType" onchange="fetchStockData()">
-            <option value="line">Classic Line Chart</option>
-            <option value="candlestick">Candlestick Chart</option>
-        </select>
+                <input type="text" id="custom-ticker-input" class="select-box" style="width: 110px; text-transform: uppercase;" placeholder="Or Symbol" onkeypress="if(event.key==='Enter') applyCustomTicker()">
+                <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.85rem;" onclick="applyCustomTicker()">Load</button>
+            </div>
 
-        <button onclick="fetchStockData()">Get Plot</button>
-        <button onclick="fetchPredictedData()">Get Prediction</button>
+            <div class="control-group">
+                <span class="control-label">Timeframe:</span>
+                <div class="btn-group">
+                    <button class="time-btn" onclick="setTimeframe('1mo', this)">1M</button>
+                    <button class="time-btn active" onclick="setTimeframe('6mo', this)">6M</button>
+                    <button class="time-btn" onclick="setTimeframe('1y', this)">1Y</button>
+                    <button class="time-btn" onclick="setTimeframe('5y', this)">5Y</button>
+                </div>
+            </div>
 
-        <p id="loadingMessage" style="display: none; color: blue;">Fetching data...</p>
-        <div id="plot"></div>
-    </div>
+            <div class="control-group">
+                <span class="control-label">Chart Mode:</span>
+                <select id="chart-type" class="select-box" onchange="renderChart()">
+                    <option value="candlestick">Candlestick</option>
+                    <option value="line" selected>Line & Area</option>
+                </select>
+            </div>
 
+            <div class="control-group">
+                <label class="toggle-chip active" id="chip-sma20" onclick="toggleIndicator('sma20')">
+                    <input type="checkbox" id="chk-sma20" checked> SMA 20
+                </label>
+                <label class="toggle-chip active" id="chip-sma50" onclick="toggleIndicator('sma50')">
+                    <input type="checkbox" id="chk-sma50" checked> SMA 50
+                </label>
+                <label class="toggle-chip" id="chip-rsi" onclick="toggleIndicator('rsi')">
+                    <input type="checkbox" id="chk-rsi"> RSI (14)
+                </label>
+            </div>
+        </div>
+
+        <!-- Studio Grid Layout -->
+        <div class="studio-container">
+            
+            <!-- Plot Column -->
+            <div class="glass-panel plot-card">
+                <div class="loading-overlay" id="loading">
+                    <div class="spinner"></div>
+                    <span style="font-weight: 600; color: var(--primary-cyan)">Processing Historical & AI Prediction Data...</span>
+                </div>
+
+                <div class="plot-header">
+                    <div class="stock-title-wrap">
+                        <h2 id="stock-name">AAPL - Apple Inc.</h2>
+                        <div class="price-display">
+                            <span id="current-price">$0.00</span>
+                            <span id="price-change-pct" class="change-pill up" style="font-size: 0.9rem">+0.00%</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="control-label">Forecast Horizon:</span>
+                        <select id="forecast-days" class="select-box" onchange="fetchPrediction()">
+                            <option value="5" selected>5 Days</option>
+                            <option value="10">10 Days</option>
+                            <option value="30">30 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="chart-div" style="width: 100%; height: 500px;"></div>
+            </div>
+
+            <!-- AI Insights Sidebar -->
+            <div class="prediction-sidebar">
+                <div class="glass-panel sidebar-card">
+                    <h3>
+                        <span>🤖 AI Prediction Engine</span>
+                        <span id="signal-badge" class="signal-tag bullish">BULLISH</span>
+                    </h3>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Target Price:</span>
+                        <span class="metric-value" id="val-target-price" style="color: var(--primary-cyan); font-size: 1.1rem;">$0.00</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Expected Return:</span>
+                        <span class="metric-value" id="val-expected-change">+0.00%</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Model Engine:</span>
+                        <span class="metric-value" style="font-size: 0.85rem">Ridge + Momentum</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">RMSE (Accuracy):</span>
+                        <span class="metric-value" id="val-rmse">0.00</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">MAE:</span>
+                        <span class="metric-value" id="val-mae">0.00</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">R² Fit Score:</span>
+                        <span class="metric-value" id="val-r2">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Technical Metrics Card -->
+                <div class="glass-panel sidebar-card">
+                    <h3>📊 Technical Indicators</h3>
+
+                    <div class="metric-row">
+                        <span class="metric-label">RSI (14-Day):</span>
+                        <span class="metric-value" id="val-rsi">50.0</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">20-Day SMA:</span>
+                        <span class="metric-value" id="val-sma20">$0.00</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">50-Day SMA:</span>
+                        <span class="metric-value" id="val-sma50">$0.00</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">20-Day EMA:</span>
+                        <span class="metric-value" id="val-ema20">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 StockPulse Predictor Studio. Interactive Machine Learning Charts.</p>
+    </footer>
+
+    <script src="../static/script.js"></script>
     <script>
-        async function fetchStockData() {
+        const LOCAL_API_BASE = (window.location.port === '5500' || window.location.protocol === 'file:') ? 'http://127.0.0.1:5000' : '';
+        let currentTicker = "AAPL";
+        let currentPeriod = "6mo";
+        let rawStockData = null;
+        let predictionData = null;
+
+        // Parse query params for ticker
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('ticker')) {
+            currentTicker = urlParams.get('ticker').toUpperCase();
+        }
+
+        async function initStudio() {
+            // Set dropdown value if in options
+            const sel = document.getElementById("ticker-select");
+            if ([...sel.options].some(o => o.value === currentTicker)) {
+                sel.value = currentTicker;
+            } else {
+                document.getElementById("custom-ticker-input").value = currentTicker;
+            }
+
+            await loadData();
+        }
+
+        async function loadData() {
+            document.getElementById("loading").classList.add("visible");
+            
             try {
-                document.getElementById("loadingMessage").style.display = "block"; 
-                let ticker = document.getElementById("ticker").value;
-                let chartType = document.getElementById("chartType").value;
+                // Parallel fetch historical stock data and prediction
+                const [stockRes, predRes] = await Promise.all([
+                    fetch(`${LOCAL_API_BASE}/api/get_stock_data?ticker=${currentTicker}&period=${currentPeriod}`),
+                    fetch(`${LOCAL_API_BASE}/api/predict_stock?ticker=${currentTicker}&future_days=${document.getElementById("forecast-days").value}`)
+                ]);
 
-                document.getElementById("stockTitle").innerText = `Stock Price for ${ticker}`;
+                rawStockData = await stockRes.json();
+                predictionData = await predRes.json();
 
-                let response = await fetch(`/get_stock_data?ticker=${ticker}`);
-                let data = await response.json();
-
-                document.getElementById("loadingMessage").style.display = "none"; 
-
-                if (!data.dates || data.dates.length === 0) {
-                    alert("No stock data available.");
+                if (rawStockData.error) {
+                    alert(rawStockData.error);
+                    document.getElementById("loading").classList.remove("visible");
                     return;
                 }
 
-                let trace;
-                if (chartType === "candlestick") {
-                    trace = {
-                        x: data.dates,
-                        open: data.open,
-                        high: data.high,
-                        low: data.low,
-                        close: data.close,
-                        type: "candlestick"
-                    };
-                } else {
-                    trace = {
-                        x: data.dates,
-                        y: data.close,
-                        type: "scatter",
-                        mode: "lines",
-                        line: { color: "#16a085" }
-                    };
-                }
-
-                let layout = {
-                    title: `${ticker} Stock Price`,
-                    xaxis: { title: "Date", rangeslider: { visible: false } },
-                    yaxis: { title: "Price ($)" }
-                };
-
-                Plotly.newPlot("plot", [trace], layout);
-            } catch (error) {
-                document.getElementById("loadingMessage").style.display = "none"; 
-                console.error("Error fetching stock data:", error);
-                alert("Failed to fetch stock data.");
+                updateHeaderMetrics();
+                updateSidebarMetrics();
+                renderChart();
+            } catch (err) {
+                console.error("Error loading studio data:", err);
+            } finally {
+                document.getElementById("loading").classList.remove("visible");
             }
         }
 
-        async function fetchPredictedData() {
-            try {
-                document.getElementById("loadingMessage").style.display = "block";
-                let ticker = document.getElementById("ticker").value;
+        function updateHeaderMetrics() {
+            document.getElementById("stock-name").innerText = `${currentTicker} Stock Analysis`;
+            const closes = rawStockData.close;
+            const last = closes[closes.length - 1];
+            const prev = closes[closes.length - 2] || last;
+            const pct = ((last - prev) / prev) * 100;
 
-                let response = await fetch(`/predict_stock?ticker=${ticker}`);
-                let data = await response.json();
+            document.getElementById("current-price").innerText = `$${last.toFixed(2)}`;
+            const changePill = document.getElementById("price-change-pct");
+            changePill.innerText = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+            changePill.className = `change-pill ${pct >= 0 ? 'up' : 'down'}`;
+        }
 
-                document.getElementById("loadingMessage").style.display = "none";
+        function updateSidebarMetrics() {
+            if (predictionData && predictionData.metrics) {
+                const m = predictionData.metrics;
+                document.getElementById("val-target-price").innerText = `$${m.target_price.toFixed(2)}`;
+                document.getElementById("val-expected-change").innerText = `${m.expected_change_pct >= 0 ? '+' : ''}${m.expected_change_pct.toFixed(2)}%`;
+                document.getElementById("val-expected-change").style.color = m.expected_change_pct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                
+                document.getElementById("val-rmse").innerText = m.rmse;
+                document.getElementById("val-mae").innerText = m.mae;
+                document.getElementById("val-r2").innerText = m.r2;
 
-                if (!data.graph) {
-                    alert("No prediction data available.");
-                    return;
-                }
+                const badge = document.getElementById("signal-badge");
+                badge.innerText = m.signal;
+                badge.className = `signal-tag ${m.signal.toLowerCase()}`;
+            }
 
-                let plot_data = JSON.parse(data.graph);
-                Plotly.newPlot("plot", plot_data);
-            } catch (error) {
-                document.getElementById("loadingMessage").style.display = "none";
-                console.error("Error fetching prediction data:", error);
-                alert("Failed to fetch prediction data.");
+            if (rawStockData) {
+                const len = rawStockData.close.length;
+                document.getElementById("val-rsi").innerText = rawStockData.rsi_14[len - 1].toFixed(1);
+                document.getElementById("val-sma20").innerText = `$${rawStockData.sma_20[len - 1].toFixed(2)}`;
+                document.getElementById("val-sma50").innerText = `$${rawStockData.sma_50[len - 1].toFixed(2)}`;
+                document.getElementById("val-ema20").innerText = `$${rawStockData.ema_20[len - 1].toFixed(2)}`;
             }
         }
 
-        // Load default stock data when the page loads
-        fetchStockData();
+        function renderChart() {
+            if (!rawStockData) return;
+
+            const traces = [];
+            const chartType = document.getElementById("chart-type").value;
+            const showSma20 = document.getElementById("chk-sma20").checked;
+            const showSma50 = document.getElementById("chk-sma50").checked;
+
+            // Historical Trace
+            if (chartType === "candlestick") {
+                traces.push({
+                    x: rawStockData.dates,
+                    open: rawStockData.open,
+                    high: rawStockData.high,
+                    low: rawStockData.low,
+                    close: rawStockData.close,
+                    type: 'candlestick',
+                    name: `${currentTicker} Price`,
+                    increasing: { line: { color: '#10b981' } },
+                    decreasing: { line: { color: '#ef4444' } }
+                });
+            } else {
+                traces.push({
+                    x: rawStockData.dates,
+                    y: rawStockData.close,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: `${currentTicker} Close`,
+                    line: { color: '#00f2fe', width: 2.5 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(0, 242, 254, 0.05)'
+                });
+            }
+
+            // SMA 20 Overlay
+            if (showSma20) {
+                traces.push({
+                    x: rawStockData.dates,
+                    y: rawStockData.sma_20,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'SMA 20',
+                    line: { color: '#f59e0b', width: 1.5, dash: 'dot' }
+                });
+            }
+
+            // SMA 50 Overlay
+            if (showSma50) {
+                traces.push({
+                    x: rawStockData.dates,
+                    y: rawStockData.sma_50,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'SMA 50',
+                    line: { color: '#8b5cf6', width: 1.5, dash: 'dot' }
+                });
+            }
+
+            // ML Future Prediction Trace
+            if (predictionData && predictionData.prediction) {
+                const pred = predictionData.prediction;
+                
+                // Prediction Upper / Lower Confidence Band Shading
+                traces.push({
+                    x: [...pred.dates, ...pred.dates.slice().reverse()],
+                    y: [...pred.upper_bound, ...pred.lower_bound.slice().reverse()],
+                    fill: 'toself',
+                    fillcolor: 'rgba(0, 242, 254, 0.12)',
+                    line: { color: 'transparent' },
+                    name: '95% Confidence Band',
+                    showlegend: true
+                });
+
+                // Predicted Trajectory Line
+                traces.push({
+                    x: pred.dates,
+                    y: pred.predicted,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: 'AI Forecast',
+                    line: { color: '#10b981', width: 3, dash: 'dash' },
+                    marker: { size: 6, color: '#10b981' }
+                });
+            }
+
+            // Plotly Layout Styling
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#9ca3af', family: 'Plus Jakarta Sans, sans-serif' },
+                margin: { t: 20, r: 20, l: 50, b: 40 },
+                showlegend: true,
+                legend: { orientation: 'h', y: 1.1, x: 0 },
+                xaxis: {
+                    gridcolor: 'rgba(255,255,255,0.05)',
+                    zerolinecolor: 'rgba(255,255,255,0.05)',
+                    rangeslider: { visible: false }
+                },
+                yaxis: {
+                    gridcolor: 'rgba(255,255,255,0.05)',
+                    zerolinecolor: 'rgba(255,255,255,0.05)',
+                    tickprefix: '$'
+                }
+            };
+
+            Plotly.newPlot('chart-div', traces, layout, { responsive: true, displayModeBar: false });
+        }
+
+        function onTickerChange() {
+            currentTicker = document.getElementById("ticker-select").value;
+            loadData();
+        }
+
+        function applyCustomTicker() {
+            const val = document.getElementById("custom-ticker-input").value.trim().toUpperCase();
+            if (val) {
+                currentTicker = val;
+                loadData();
+            }
+        }
+
+        function setTimeframe(tf, btn) {
+            document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentPeriod = tf;
+            loadData();
+        }
+
+        function toggleIndicator(type) {
+            const chk = document.getElementById(`chk-${type}`);
+            const chip = document.getElementById(`chip-${type}`);
+            chk.checked = !chk.checked;
+            chip.classList.toggle("active", chk.checked);
+            renderChart();
+        }
+
+        async function fetchPrediction() {
+            loadData();
+        }
+
+        initStudio();
     </script>
-
 </body>
 </html>
