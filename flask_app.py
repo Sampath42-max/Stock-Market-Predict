@@ -13,6 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 app = Flask(__name__)
+application = app  # WSGI entry point alias for Gunicorn / Render / AWS / Heroku
 CORS(app)  # Enable Cross-Origin requests for Live Server compatibility
 
 # Market Open & Close Time (Eastern Time)
